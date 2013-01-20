@@ -14,3 +14,8 @@ lex.yy.o: lex.yy.c
 	$(CC) $(CFLAGS) -c $<
 rubic: y.tab.o lex.yy.o
 	$(CC) -o $@ $^ $(LDFLAGS)
+clean:
+	rm -rf y.tab.*
+	rm -rf lex.yy.*
+	rm -rf *~
+	rm -rf rubic
