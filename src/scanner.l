@@ -8,13 +8,24 @@ int column=0; int lineno=0;
 void count() {
   int i;
   for (i = 0; yytext[i] != '\0'; i++) {
-    if (yytext[i] == '\n')
-      column = 0;
+    if (yytext[i] == '\n'){     
+    column = 0;
+    printf("irb(main):%d:0>",lineno);
+    }
     else if (yytext[i] == '\t')
       column += 8 - (column % 8);
     else
       column++;
   }
+}
+/* Function that prints the string */
+void rubyprint(char s[]) {
+  int i = 0;
+  while(s[i]!= '\"'){
+    printf("%c",s[i]);
+    i++;
+  }
+  printf("\n");
 }
 /* Function called in case of error during parsing */
 void yyerror(char *s) {
@@ -25,11 +36,14 @@ void yyerror(char *s) {
 F ([0-9]+\.[0-9]*)
 I ([0-9]+)
 S (\"[^\n\"]*\")
+S1 (\"[^\"]*)
 ID ([$@]?[a-zA-Z_][a-zA-Z_0-9]*)
 %%
 {F}      { count(); return(FLOAT); }
 {I}      { count(); return(INT); }
-{S}      { count(); return(STRING); }
+{S}      { count(); rubyprint(yytext+1); return(STRING); }
+puts\"[^\n\"]*\" {count(); rubyprint(yytext + 5);printf("=>nil\n");return(STRING);}
+puts\ \"[^\n\"]*\" {count();rubyprint(yytext + 6);printf("=>nil\n"); return(STRING);}
 "for"    { count(); return(FOR); }
 "while"  { count(); return(WHILE);}
 "if"     { count(); return(IF); }
