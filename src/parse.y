@@ -1,6 +1,55 @@
 %{
   #include <stdio.h>
+  #include <unistd.h>
   #include "y.tab.h"
+
+#define I 0
+#define F 1
+#define S 2
+#define U -1
+
+int plus[3][3];
+int moins[3][3];
+int mul[3][3];
+int div[3][3];
+
+void init(int t[3][3]){
+  int i,j;
+  for(i=0; i<3; i++){
+    for(j=0; j<3;j++)
+      tab[i][j] = -1;
+  }
+}
+
+ void init_tab_sym(){
+   init(plus);
+   plus[I][I]=I;
+   plus[I][F]=F;
+   plus[F][F]=F;
+   plus[F][I]=F;
+   plus[S][S]=S;
+
+   init(moins);
+   moins[I][I]=I;
+   moins[I][F]=F;
+   moins[F][F]=F;
+   moins[F][I]=F;
+
+   init(mul);
+   mul[I][I]=I;
+   mul[I][F]=F;
+   mul[F][F]=F;
+   mul[F][I]=F;
+   
+   init(div);
+   div[I][I]=I;
+   div[I][F]=F;
+   div[F][F]=F;
+   div[F][I]=F;
+ }
+
+
+ 
 
 %}
 %token AND OR CLASS IF THEN ELSE END WHILE DO DEF LEQ GEQ 
