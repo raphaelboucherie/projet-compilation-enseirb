@@ -692,9 +692,7 @@ void yyerror(char *s) {
  
 
 int main(void) {
-
- yyparse();
-
- return 0;
+  yyparse();
+  return 0;
 
 }
