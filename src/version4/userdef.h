@@ -4,8 +4,6 @@
  * @date   March, 2012
  * @brief  mixcards utilities (header)
  *
- * This file contains the functions used for managing the cardspile and mixing the 
- * cards.
  */
 #ifndef _USERDEF_
 #define _USERDEF_
@@ -36,7 +34,6 @@ typedef struct{
   char name[MAXSIZE];
   typpo type;
   Valeur *value;
-  int ival;
   struct varIndex * next ;
 } VarIndex;
 
