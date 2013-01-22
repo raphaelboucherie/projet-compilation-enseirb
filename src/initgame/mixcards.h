@@ -11,40 +11,28 @@
 #ifndef _MIXCARDS_
 #define _MIXCARDS_
 
-#include "structure.h"
+//#include "structure.h"
+#define NUMBER_CARDS 102
+#define TYPE_CARDS 6
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+//#include <ncurses.h>
+#include <math.h>
+#include <time.h>
+#include <sys/types.h>
 
-
+struct cardspile{
+  //represents the cardspile
+  char cards[NUMBER_CARDS+1];
+  //number of cards
+  unsigned int  size;
+};
 /**
  * @brief provides an empty pile
  */
 struct cardspile * empty__pile(void);
-/**
- * @brief returns the cardspile size
- */
-int size__cardspile(const struct cardspile * );
-/**
- * @brief adds a card to the pile
- */
-void add__cardspile(struct cardspile * , char );
-/**
- * @brief removes the last card from the pile
- */
-char remove__cardspile(struct cardspile * );
-/**
- * @brief tests whether the pile is empty or not
- */
-int is__empty_cardspile(const struct cardspile * );
-/**
- * @brief returns a random pile
- */
-struct cardspile * random__cardspile(void);
-/**
- * @brief sets the pile free
- */
-void free_cardspile(struct cardspile *p);
-/**
- * @brief prints the pile
- */
-void affiche(const struct cardspile * p);
+
 
 #endif //_MIXCARDS_
