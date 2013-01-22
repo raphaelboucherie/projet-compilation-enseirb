@@ -16,13 +16,13 @@
 //#define _POSIX_SOURCE 
 //we donot understand this 
 
-/******************include******************/
+/******************include0******************/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <ncurses.h>
+//#include <ncurses.h>
 #include <math.h>
 #include <time.h>
 #include <sys/types.h>

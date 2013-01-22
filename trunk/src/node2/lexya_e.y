@@ -132,55 +132,34 @@ function stmt { NodeExecute($2); NodeFree($2); }
 stmt:
 
 ';'                 { $$ = opr(';', 2, NULL, NULL); debug_vsp(yyval,";",yyvsp,"0"); }
-
 | expr_set ';'      { $$ = $1; debug_vsp(yyval,"es;",yyvsp,"01");                   }
-
 | PRINT expr ';'    { $$ = opr(PRINT, 1, $2); debug_vsp(yyval,"p(e);",yyvsp,"401"); }
-
 | PRINT expr_set ';'    { $$ = opr(PRINT, 1, $2); debug_vsp(yyval,"p(es);",yyvsp,"401"); }
-
 | FOR '(' expr_set ';' expr_comp ';' expr_set ')' stmt { $$ = opr(FOR, 4, $3, $5, $7, $9); debug_vsp(yyval,"for(es;ec;es) st",yyvsp,"410101010"); }
-
 | WHILE '(' expr_comp ')' stmt       { $$ = opr(WHILE, 2, $3, $5); debug_vsp(yyval,"while(ec) st",yyvsp,"41010"); }
-
 | IF '(' expr_comp ')' stmt %prec IF { $$ = opr(IF, 2, $3, $5);    debug_vsp(yyval,"if(ec) st",yyvsp,"41010");    }
-
 | IF '(' expr_comp ')' stmt ELSE stmt %prec ELSE       { $$ = opr(IF, 3, $3, $5, $7);      debug_vsp(yyval,"if(ec)else st",yyvsp,"4101040");      }
-
 | '{' stmt_list '}' { $$ = $2; debug_vsp(yyval,"{stl}",yyvsp,"101"); }
-
 ;
 
  
 
 stmt_list:
-
 stmt              { $$ = $1;  debug_vsp(yyval,"st",yyvsp,"0");  }
-
 | stmt_list stmt  { $$ = opr(';', 2, $1, $2); debug_vsp(yyval,"stl st",yyvsp,"00"); }
-
 ;
 
  
 
 expr_set:
-
 VARIABLE '=' expr { $$ = opr('=', 2, set_index($1), $3); debug_vsp(yyval,"v=e",yyvsp,"210"); }
-
 | VARIABLE '=' expr_setself { $$ = opr('=', 2, set_index($1), $3); debug_vsp(yyval,"v=ess",yyvsp,"210"); }
-
 | expr_setself
-
 ;
 
- 
-
 expr_setself:
-
   ADD_T VARIABLE  { $$ = opr(ADD_T, 1, set_index($2));  debug_vsp(yyval,"++v",yyvsp,"42");   }
-
 | MUS_T VARIABLE  { $$ = opr(MUS_T, 1, set_index($2));  debug_vsp(yyval,"--v",yyvsp,"42");   }
-
 | VARIABLE ADD_T  { $$ = opr(ADD_TT, 1, set_index($1));  debug_vsp(yyval,"v++",yyvsp,"24");  }
 
 | VARIABLE MUS_T  { $$ = opr(MUS_TT, 1, set_index($1));  debug_vsp(yyval,"v--",yyvsp,"24");  }
