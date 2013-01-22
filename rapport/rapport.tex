@@ -1,0 +1,277 @@
+\documentclass{article}
+
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{verbatim}
+\usepackage{amsmath}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{array}
+
+\usepackage{url}
+
+
+
+\usepackage[final]{pdfpages}
+
+%% Si ca ne compile pas chez vous, mettez la ligne suivante en commentaire
+%\usepackage{tikz}
+
+\date{\vspace{3 cm} \today}
+\author{\vspace{4 cm} \\ Groupe :\\ \\Ben Brahim Dhouha\\Wang Miao }
+\title{Rapport du projet de compilation \\ }
+
+
+\usepackage{fancyhdr}
+\lhead{Projet de compilation du semestre S7 }
+\rhead{}
+\renewcommand{\headrulewidth}{1px}
+\lfoot{ \bsc{Enseirb-Matmeca 2012-2013}}
+\rfoot{ \bsc{Filière Informatique - I2}}
+\renewcommand{\footrulewidth}{1px}
+\pagestyle{fancy}
+
+
+
+\begin{document}
+
+
+
+\newenvironment{narrow}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+
+
+%\thispagestyle{empty}
+% \begin{figure}
+% \includegraphics[width=0.25\textwidth]{enseirb-matmeca.jpg}
+% \end{figure}
+
+\maketitle
+
+
+
+
+\newpage
+
+
+\section*{Introduction}
+
+
+Le projet consiste à créer un compilateur d'un langage objet proche du langage Ruby. Le langage sera compilé en du code intermédiaire du compilateur LLVM. L'appel au compilateur LLVM permettra ainsi de finir la compilation en binaire et de générer du code efficace. \\
+
+Dans ce rapport, il sera question de présenter , en premier temps, l'analyse du problème, puis la phase de conception dans laquelle nous allons présenter les structures untilisées pour les symboles et les expressions. Ensuite, nous introduirons le code cible produit.
+A la fin, un jeu de test a été effectué afin de vérifier que le compilateur arrive effectivement à compiler un code source introduit.
+
+\newpage
+\tableofcontents
+
+\newpage
+\section{Analyse du problème}
+
+\subsection{La grammaire}
+Voici la grammaire utilisée : 
+
+program $\rightarrow$ topstmts opt$\_$terms \\
+topstmts $\rightarrow$ topstmt \\
+         | topstmts terms topstmt \\
+topstmt $\rightarrow$ CLASS ID term stmts END \\
+| CLASS ID < ID term stmts END \\
+| stmt \\
+stmts $\rightarrow$ $\epsilon$ \\
+|stmt \\
+| stmts terms stmt \\
+stmt $\rightarrow$ IF expr THEN stmts terms END \\
+| IF expr THEN stmts terms ELSE stmts terms END \\
+| FOR ID IN expr TO expr term stmts terms END \\
+| WHILE expr DO term stmts terms END \\
+| lhs = expr \\
+| RETURN expr \\
+| DEF ID opt$\_$params term stmts terms END \\
+opt$\_$params $\rightarrow$ $\epsilon$ \\
+| ( ) \\
+| ( params ) \\
+params $\rightarrow$ ID , params \\
+| ID \\
+lhs $\rightarrow$ ID \\
+| ID . primary \\
+| ID ( exprs ) \\
+exprs $\rightarrow$ exprs , expr \\
+| expr \\
+primary $\rightarrow$ lhs \\
+| STRING \\
+| FLOAT \\
+| INT \\
+| ( expr ) \\
+expr $\rightarrow$ expr AND comp$\_$expr \\
+| expr OR comp$\_$expr \\
+| comp$\_$ expr \\
+comp$\_$expr $\rightarrow$ additive$\_$expr < additive$\_$expr \\
+| additive$\_$expr > additive$\_$expr \\  
+| additive$\_$expr LEQ additive$\_$expr \\  
+| additive$\_$expr GEQ additive$\_$expr \\  
+| additive$\_$expr EQ additive$\_$expr \\  
+| additive$\_$expr NEQ additive$\_$expr \\  
+| additive$\_$expr  \\
+additive$\_$expr $\rightarrow$  multiplicative$\_$expr \\ 
+| additive$\_$expr + multiplicative$\_$expr \\
+| additive$\_$expr - multiplicative$\_$expr \\
+multiplicative$\_$expr $\rightarrow$ multiplicative$\_$expr * primary \\
+| multiplicative$\_$expr / primary \\
+| primary \\
+opt$\_$terms $\rightarrow$ $\epsilon$ \\
+| terms		\\
+terms $\rightarrow$ terms ; \\
+%| terms '\n' \\
+| ; \\
+%| '\n'	\\	
+term $\rightarrow$ ; \\
+%| '\n' \\
+
+Voici un exemple de mot reconnu par la grammaire :
+\begin{verbatim}
+def set_params()
+   a = 5
+   return 0
+end 
+\end{verbatim}
+
+On obtient l'arbre suivant :
+
+\newpage
+\begin{figure}[!h]
+\includegraphics[width=0.8\textwidth]{Diagramme1.png}
+\caption{arbre d'exécution}
+\end{figure}
+
+
+\subsection{Les modifications apportées sur la grammaire}
+
+
+\section{Conception}
+
+\subsection{Les symboles} 
+
+
+\subsubsection*{Structure}
+Une table de symboles doit stocker un nombre important de noms de variables et d'informations qui leurs sont reliées. Elle n'a pas donc de taille fixe. De plus, il faut pouvoir y accéder de manière rapide. D'où le choix d'une liste chaînée. 
+Un symbole est représenté sous la forme d'une structure :  \\
+
+struct varIndex { \\
+char name[MAXSIZE]; \\
+typpo type; \\
+valeur *value; \\
+int ival; \\
+varIndex *next; \\
+}; \\
+
+\begin{itemize}
+\item \emph{name} est le nom de la variable tel qu'il est dans le code source. \\
+\item \emph{type} est le type de la variable. Typpo étant un type énuméré où : \\
+\begin{itemize}
+\item 0 pour le type \emph{int}. \\
+\item 1 pour le type \emph{float}.\\
+\item 2 pour le type \emph{string}. \\
+\item 3 pour le type \emph{boolean}. \\
+\item 4 pour \emph{undef}. \\
+\end{itemize}
+
+\item \emph{value} est la valeur du symbole. Valeur étant un type énuméré pour que la valeur soit de type int, float, string ou encore boolean en fonction du type du symbole.\\
+\emph{next} pointe sur le symbole suivant pour former une liste chaînée. \\
+\end{itemize}
+
+Le schéma suivant explique la liste des symboles que nous avons utilisée: \\
+
+==============schéma==========
+
+\subsubsection*{Actions sur les symboles}
+Les actions réalisées sur les symboles ont pour but de créer, initialiser, afficher, chercher, ajouter et libérer un symbole : \\
+\begin{itemize}
+\item nexVarIndex(void) $\rightarrow$ varIndex \\
+\item initVarIndex(varIndex*) $\rightarrow$ void \\
+\item printVarIndex(varIndex*) $\rightarrow$ void \\
+\end{itemize}
+
+\subsection{Les expressions}
+
+\subsubsection*{Structure}
+
+\subsubsection*{Actions sur les expressions}
+
+\section{Analyse sémantique}
+
+\subsection{Table des symboles}
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+  \hline
+  + & I & F & S & B \\
+  \hline
+  I & I & F &   &  \\
+  \hline
+  F & F & F &   & \\
+  \hline
+  S &   &   & S & \\
+  \hline
+  B & & & & \\
+  \hline
+\end{tabular}
+\end{center}
+
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+  \hline
+  * & I & F & S & B \\
+  \hline
+  I & I & F &   &  \\
+  \hline
+  F & F & F &   & \\
+  \hline
+  S &   &   &  & \\
+  \hline
+  B & & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+
+
+\begin{center}
+\begin{tabular}{|c|c|c|c|c|}
+  \hline
+  cmp & I & F & S & B \\
+  \hline
+  I & B & B &   &  \\
+  \hline
+  F & B & B &   & \\
+  \hline
+  S &   &   & B  & \\
+  \hline
+  B & & & & \\
+\hline
+\end{tabular}
+\end{center}
+
+
+\subsection{Table des expressions}
+
+\section{Production du code}
+
+\section{Tests}
+
+\section*{Conclusion}
+Au cours de ce projet, nous avons pu mettre en oeuvre les connaissances acquises au cours des séances de cours et de TD et les concepts élémentaires de compilation de langage de programmation. \\
+
+Nous nous sommes familiarisées avec des outils d'analyse lexicale tel LEX et d'analyse syntaxique tel YACC                                                 
+
+
+\end{document}
