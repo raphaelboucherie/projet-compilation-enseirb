@@ -50,17 +50,8 @@ puts[\ ]+{S} {count();rubyprint(yytext + 6);printf("=>nil\n");}
 "||"     { count(); return(OR); }
 ";"	 { count(); return(';'); }
 ","	 { count(); return(','); }
-"."	 { count(); return('.'); }
-"="      { count(); return('='); }
-"("	 { count(); return('('); }
-")"	 { count(); return(')'); }
-"-"	 { count(); return('-'); }
-"+"	 { count(); return('+'); }
-"*"	 { count(); return('*'); }
-"/"	 { count(); return('/'); }
-"<"	 { count(); return('<'); }
-">"	 { count(); return('>'); }
-[\n]     { lineno++; column = 0; return ('\n'); }  
+[\n]     { lineno++; column = 0; return ('\n'); } 
+[()<>=+\-*/;{}.] {yylval.index = *yytext;add_buff(yytext);return *yytext;} 
 [\t]         ;
 .            ;
 

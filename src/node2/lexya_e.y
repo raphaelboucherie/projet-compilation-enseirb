@@ -88,133 +88,122 @@ Node *node; /* 结点地址 */
  
 
 %token <val> NUMBER
-
 %token <index> VARIABLE
-
 %token PRINT
-
 %token FOR WHILE
-
+%token CLASS END
+%token DEF IN END DO
+%token THEN
 %nonassoc IF
-
 %nonassoc ELSE
 
 %left AND OR
-
 %left GE LE EQ NE '>' '<'
-
 %left '+' '-'
-
 %left '*' '/'
-
 %left ADD_T ADD_TT MUS_T MUS_TT
+%left LEQ
+
 
 %nonassoc UMINUS
 
-%type <node> stmt stmt_list expr_set expr_setself expr_comp expr
+ //%type <node> stmt stmt_list expr_set expr_setself expr_comp expr
+%type <node> topstmts topstmt
+%type <node> comp_expr additive_expr multiplicative_expr
+%type <node> primary
 
 %%
 
-program:
-
-function { exit(0); }
-
+program		:  
+topstmts opt_terms
+;
+topstmts        :      
+| topstmt {}
+| topstmts terms topstmt {}
+;
+topstmt	        : 
+CLASS ID term stmts END {} 
+| CLASS ID '<' ID term stmts END {}
+| stmt {}
+| exprs {}//printf("%d\n",tmp);}
 ;
 
-function:
-
-function stmt { NodeExecute($2); NodeFree($2); }
-
-| /* NULL */
-
+stmts	        : /* none */
+| stmt {}
+| stmts terms stmt {}
 ;
 
-stmt:
+stmt		: 
+IF expr THEN stmts terms END {}
+| IF expr THEN stmts terms ELSE stmts terms END {} 
+| FOR ID IN expr TO expr term stmts terms END {}
+| WHILE expr DO term stmts terms END {}
+| lhs '=' expr {}
+| RETURN expr {}
+| DEF ID opt_params term stmts terms END {}
+; 
 
-';'                 { $$ = opr(';', 2, NULL, NULL); debug_vsp(yyval,";",yyvsp,"0"); }
-| expr_set ';'      { $$ = $1; debug_vsp(yyval,"es;",yyvsp,"01");                   }
-| PRINT expr ';'    { $$ = opr(PRINT, 1, $2); debug_vsp(yyval,"p(e);",yyvsp,"401"); }
-| PRINT expr_set ';'    { $$ = opr(PRINT, 1, $2); debug_vsp(yyval,"p(es);",yyvsp,"401"); }
-| FOR '(' expr_set ';' expr_comp ';' expr_set ')' stmt { $$ = opr(FOR, 4, $3, $5, $7, $9); debug_vsp(yyval,"for(es;ec;es) st",yyvsp,"410101010"); }
-| WHILE '(' expr_comp ')' stmt       { $$ = opr(WHILE, 2, $3, $5); debug_vsp(yyval,"while(ec) st",yyvsp,"41010"); }
-| IF '(' expr_comp ')' stmt %prec IF { $$ = opr(IF, 2, $3, $5);    debug_vsp(yyval,"if(ec) st",yyvsp,"41010");    }
-| IF '(' expr_comp ')' stmt ELSE stmt %prec ELSE       { $$ = opr(IF, 3, $3, $5, $7);      debug_vsp(yyval,"if(ec)else st",yyvsp,"4101040");      }
-| '{' stmt_list '}' { $$ = $2; debug_vsp(yyval,"{stl}",yyvsp,"101"); }
+opt_params      : /* none */
+| '(' ')' {}
+| '(' params ')' {}
 ;
-
- 
-
-stmt_list:
-stmt              { $$ = $1;  debug_vsp(yyval,"st",yyvsp,"0");  }
-| stmt_list stmt  { $$ = opr(';', 2, $1, $2); debug_vsp(yyval,"stl st",yyvsp,"00"); }
+params          : 
+ID ',' params {}
+| ID {}
+; 
+lhs             : 
+ID
+| ID '.' primary {}
+| ID '(' exprs ')' {}
 ;
-
- 
-
-expr_set:
-VARIABLE '=' expr { $$ = opr('=', 2, set_index($1), $3); debug_vsp(yyval,"v=e",yyvsp,"210"); }
-| VARIABLE '=' expr_setself { $$ = opr('=', 2, set_index($1), $3); debug_vsp(yyval,"v=ess",yyvsp,"210"); }
-| expr_setself
+exprs           : 
+exprs ',' expr {}
+| expr {}//printf("%s\n",$1->name);}
 ;
-
-expr_setself:
-  ADD_T VARIABLE  { $$ = opr(ADD_T, 1, set_index($2));  debug_vsp(yyval,"++v",yyvsp,"42");   }
-| MUS_T VARIABLE  { $$ = opr(MUS_T, 1, set_index($2));  debug_vsp(yyval,"--v",yyvsp,"42");   }
-| VARIABLE ADD_T  { $$ = opr(ADD_TT, 1, set_index($1));  debug_vsp(yyval,"v++",yyvsp,"24");  }
-
-| VARIABLE MUS_T  { $$ = opr(MUS_TT, 1, set_index($1));  debug_vsp(yyval,"v--",yyvsp,"24");  }
-
-| '(' expr_setself ')' { $$ = $2; debug_vsp(yyval,"(ess)",yyvsp,"101");   }
-
+expr            : 
+expr AND comp_expr {}
+| expr OR comp_expr {}
+| comp_expr {$$ = $1;}
 ;
-
- 
-
-expr_comp:
-
-  expr '<' expr   { $$ = opr('<', 2, $1, $3); debug_vsp(yyval,"e<e",yyvsp,"010");    }
-
-| expr '>' expr   { $$ = opr('>', 2, $1, $3); debug_vsp(yyval,"e>e",yyvsp,"010");    }
-
-| expr GE expr    { $$ = opr(GE, 2, $1, $3);  debug_vsp(yyval,"e>=e",yyvsp,"040");   }
-
-| expr LE expr    { $$ = opr(LE, 2, $1, $3);  debug_vsp(yyval,"e<=e",yyvsp,"040");   }
-
-| expr NE expr    { $$ = opr(NE, 2, $1, $3);  debug_vsp(yyval,"e!=e",yyvsp,"040");   }
-
-| expr EQ expr    { $$ = opr(EQ, 2, $1, $3);  debug_vsp(yyval,"e==e",yyvsp,"040");   }
-
-| expr_comp AND expr_comp { $$ = opr(AND, 2, $1, $3); debug_vsp(yyval,"ec&&ec",yyvsp,"040"); }
-
-| expr_comp OR expr_comp  { $$ = opr(OR, 2, $1, $3);  debug_vsp(yyval,"ec||ec",yyvsp,"040"); }
-
-| '(' expr_comp ')'       { $$ = $2;                  debug_vsp(yyval,"(ec)",yyvsp,"101");   }
-
+comp_expr       : 
+additive_expr '<' additive_expr //{$$->type = tab_comp[$1->type][$3->type];}
+| additive_expr '>' additive_expr //{$$->type = tab_comp[$1->type][$3->type];}
+| additive_expr LEQ additive_expr {}
+| additive_expr GEQ additive_expr {}
+| additive_expr EQ additive_expr {}
+| additive_expr NEQ additive_expr {}
+| additive_expr {$$ = $1;}
 ;
-
- 
-
-expr:
-
-NUMBER            { $$ = set_content($1);      debug_vsp(yyval,"f",yyvsp,"3");     }
-
-| VARIABLE        { $$ = set_index($1);        debug_vsp(yyval,"v",yyvsp,"2");     }
-
-| '-' NUMBER %prec UMINUS { $$ = set_content(-$2);   debug_vsp(yyval,"-e", yyvsp,"13"); }
-
-| expr '+' expr   { $$ = opr('+', 2, $1, $3);  debug_vsp(yyval,"e+e",yyvsp,"010"); }
-
-| expr '-' expr   { $$ = opr('-', 2, $1, $3);  debug_vsp(yyval,"e-e",yyvsp,"010"); }
-
-| expr '*' expr   { $$ = opr('*', 2, $1, $3);  debug_vsp(yyval,"e*e",yyvsp,"010"); }
-
-| expr '/' expr   { $$ = opr('/', 2, $1, $3);  debug_vsp(yyval,"e/e",yyvsp,"010"); }
-
-| '(' expr ')'    { $$ = $2;                   debug_vsp(yyval,"(e)",yyvsp,"101"); }
-
+additive_expr   : 
+multiplicative_expr {$$ = $1;}
+| additive_expr '+' multiplicative_expr //{$$->type = tab_plus[$1->type][$3->type];}
+| additive_expr '-' multiplicative_expr //{$$->type = tab_plus[$1->type][$3->type];}
 ;
-
- 
+multiplicative_expr : 
+multiplicative_expr '*' primary //{$$->type = tab_mult[$1->type][$3->type];}
+| multiplicative_expr '/' primary //{$$->type = tab_mult[$1->type][$3->type];}
+| primary {$$ = $1;}
+;
+primary         : 
+lhs
+| STRING //{$$ = $1;} 
+| FLOAT //{$$ = $1;}//{ $$.type = $1.type; $$.fval = $1.fval;}
+| INT {$$ = $1;} //$$.type = $1.type; $$.ival = $1.ival;}//add_res();}
+| '(' expr ')' {}
+;
+opt_terms	: /* none */
+| terms
+;
+terms		: 
+terms ';'
+| terms '\n'
+| ';'
+| '\n'
+;
+term            : 
+';'
+| '\n'
+;
 
 //| '(' expr error        { $$ = $2; printf("ERROR"); exit(0); }
 

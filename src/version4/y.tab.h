@@ -95,6 +95,7 @@ typedef union YYSTYPE
 /* Line 2068 of yacc.c  */
 #line 32 "parse.y"
 
+  int index;
   int ival;
   float fval;
   char *sval;
@@ -106,7 +107,7 @@ typedef union YYSTYPE
 
 
 /* Line 2068 of yacc.c  */
-#line 110 "y.tab.h"
+#line 111 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
