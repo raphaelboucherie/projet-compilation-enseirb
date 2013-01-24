@@ -160,8 +160,11 @@ any  .
 
 }
 
- 
-
+"class"  { return(CLASS); }
+"def"    { return(DEF); }
+"in"     { return(IN); }
+"end"    { return(END); }
+"do"     { return(DO); }
 "++" { yylval.index = ADD_T-USER_DEF_NUM; G_Def[yylval.index].name="++"; G_Def[yylval.index+1].name="++";  add_buff(yytext); return ADD_T; }
 
 "--" { yylval.index = MUS_T-USER_DEF_NUM; G_Def[yylval.index].name="--"; G_Def[yylval.index+1].name="++";  add_buff(yytext); return MUS_T; }

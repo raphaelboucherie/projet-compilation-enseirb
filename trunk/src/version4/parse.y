@@ -30,6 +30,7 @@
   int iBuffY=0;
 %}
 %union{
+  int index;
   int ival;
   float fval;
   char *sval;

@@ -185,6 +185,7 @@ typedef union YYSTYPE
 /* Line 293 of yacc.c  */
 #line 32 "parse.y"
 
+  int index;
   int ival;
   float fval;
   char *sval;
@@ -196,7 +197,7 @@ typedef union YYSTYPE
 
 
 /* Line 293 of yacc.c  */
-#line 200 "y.tab.c"
+#line 201 "y.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -208,7 +209,7 @@ typedef union YYSTYPE
 
 
 /* Line 343 of yacc.c  */
-#line 212 "y.tab.c"
+#line 213 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -520,12 +521,12 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    61,    61,    63,    64,    65,    68,    69,    70,    71,
-      74,    75,    76,    80,    81,    82,    83,    84,    85,    86,
-      89,    90,    91,    94,    95,    98,    99,   100,   103,   104,
-     107,   108,   109,   112,   113,   114,   115,   116,   117,   118,
-     121,   122,   123,   126,   127,   128,   131,   132,   133,   134,
-     135,   137,   138,   141,   142,   143,   144,   147,   148
+       0,    62,    62,    64,    65,    66,    69,    70,    71,    72,
+      75,    76,    77,    81,    82,    83,    84,    85,    86,    87,
+      90,    91,    92,    95,    96,    99,   100,   101,   104,   105,
+     108,   109,   110,   113,   114,   115,   116,   117,   118,   119,
+     122,   123,   124,   127,   128,   129,   132,   133,   134,   135,
+     136,   138,   139,   142,   143,   144,   145,   148,   149
 };
 #endif
 
@@ -1547,294 +1548,294 @@ yyreduce:
         case 4:
 
 /* Line 1806 of yacc.c  */
-#line 64 "parse.y"
+#line 65 "parse.y"
     {}
     break;
 
   case 5:
 
 /* Line 1806 of yacc.c  */
-#line 65 "parse.y"
+#line 66 "parse.y"
     {}
     break;
 
   case 6:
 
 /* Line 1806 of yacc.c  */
-#line 68 "parse.y"
+#line 69 "parse.y"
     {}
     break;
 
   case 7:
 
 /* Line 1806 of yacc.c  */
-#line 69 "parse.y"
+#line 70 "parse.y"
     {}
     break;
 
   case 8:
 
 /* Line 1806 of yacc.c  */
-#line 70 "parse.y"
+#line 71 "parse.y"
     {}
     break;
 
   case 9:
 
 /* Line 1806 of yacc.c  */
-#line 71 "parse.y"
+#line 72 "parse.y"
     {}
     break;
 
   case 11:
 
 /* Line 1806 of yacc.c  */
-#line 75 "parse.y"
+#line 76 "parse.y"
     {}
     break;
 
   case 12:
 
 /* Line 1806 of yacc.c  */
-#line 76 "parse.y"
+#line 77 "parse.y"
     {}
     break;
 
   case 13:
 
 /* Line 1806 of yacc.c  */
-#line 80 "parse.y"
+#line 81 "parse.y"
     {}
     break;
 
   case 14:
 
 /* Line 1806 of yacc.c  */
-#line 81 "parse.y"
+#line 82 "parse.y"
     {}
     break;
 
   case 15:
 
 /* Line 1806 of yacc.c  */
-#line 82 "parse.y"
+#line 83 "parse.y"
     {}
     break;
 
   case 16:
 
 /* Line 1806 of yacc.c  */
-#line 83 "parse.y"
+#line 84 "parse.y"
     {}
     break;
 
   case 17:
 
 /* Line 1806 of yacc.c  */
-#line 84 "parse.y"
+#line 85 "parse.y"
     {}
     break;
 
   case 18:
 
 /* Line 1806 of yacc.c  */
-#line 85 "parse.y"
+#line 86 "parse.y"
     {}
     break;
 
   case 19:
 
 /* Line 1806 of yacc.c  */
-#line 86 "parse.y"
+#line 87 "parse.y"
     {}
     break;
 
   case 21:
 
 /* Line 1806 of yacc.c  */
-#line 90 "parse.y"
+#line 91 "parse.y"
     {}
     break;
 
   case 22:
 
 /* Line 1806 of yacc.c  */
-#line 91 "parse.y"
+#line 92 "parse.y"
     {}
     break;
 
   case 23:
 
 /* Line 1806 of yacc.c  */
-#line 94 "parse.y"
+#line 95 "parse.y"
     {}
     break;
 
   case 24:
 
 /* Line 1806 of yacc.c  */
-#line 95 "parse.y"
+#line 96 "parse.y"
     {}
     break;
 
   case 26:
 
 /* Line 1806 of yacc.c  */
-#line 99 "parse.y"
+#line 100 "parse.y"
     {}
     break;
 
   case 27:
 
 /* Line 1806 of yacc.c  */
-#line 100 "parse.y"
+#line 101 "parse.y"
     {}
     break;
 
   case 28:
 
 /* Line 1806 of yacc.c  */
-#line 103 "parse.y"
+#line 104 "parse.y"
     {}
     break;
 
   case 29:
 
 /* Line 1806 of yacc.c  */
-#line 104 "parse.y"
+#line 105 "parse.y"
     {}
     break;
 
   case 30:
 
 /* Line 1806 of yacc.c  */
-#line 107 "parse.y"
+#line 108 "parse.y"
     {}
     break;
 
   case 31:
 
 /* Line 1806 of yacc.c  */
-#line 108 "parse.y"
+#line 109 "parse.y"
     {}
     break;
 
   case 32:
 
 /* Line 1806 of yacc.c  */
-#line 109 "parse.y"
+#line 110 "parse.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 33:
 
 /* Line 1806 of yacc.c  */
-#line 112 "parse.y"
-    {}
+#line 113 "parse.y"
+    {(yyval.node)->type = tab_comp[(yyvsp[(1) - (3)].node)->type][(yyvsp[(3) - (3)].node)->type];}
     break;
 
   case 34:
 
 /* Line 1806 of yacc.c  */
-#line 113 "parse.y"
-    {}
+#line 114 "parse.y"
+    {(yyval.node)->type = tab_comp[(yyvsp[(1) - (3)].node)->type][(yyvsp[(3) - (3)].node)->type];}
     break;
 
   case 35:
-
-/* Line 1806 of yacc.c  */
-#line 114 "parse.y"
-    {}
-    break;
-
-  case 36:
 
 /* Line 1806 of yacc.c  */
 #line 115 "parse.y"
     {}
     break;
 
-  case 37:
+  case 36:
 
 /* Line 1806 of yacc.c  */
 #line 116 "parse.y"
     {}
     break;
 
-  case 38:
+  case 37:
 
 /* Line 1806 of yacc.c  */
 #line 117 "parse.y"
     {}
     break;
 
-  case 39:
+  case 38:
 
 /* Line 1806 of yacc.c  */
 #line 118 "parse.y"
+    {}
+    break;
+
+  case 39:
+
+/* Line 1806 of yacc.c  */
+#line 119 "parse.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 40:
 
 /* Line 1806 of yacc.c  */
-#line 121 "parse.y"
+#line 122 "parse.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 41:
 
 /* Line 1806 of yacc.c  */
-#line 122 "parse.y"
+#line 123 "parse.y"
     {(yyval.node)->type = tab_plus[(yyvsp[(1) - (3)].node)->type][(yyvsp[(3) - (3)].node)->type];}
     break;
 
   case 42:
 
 /* Line 1806 of yacc.c  */
-#line 123 "parse.y"
+#line 124 "parse.y"
     {(yyval.node)->type = tab_plus[(yyvsp[(1) - (3)].node)->type][(yyvsp[(3) - (3)].node)->type];}
     break;
 
   case 43:
 
 /* Line 1806 of yacc.c  */
-#line 126 "parse.y"
+#line 127 "parse.y"
     {(yyval.node)->type = tab_mult[(yyvsp[(1) - (3)].node)->type][(yyvsp[(3) - (3)].node)->type];}
     break;
 
   case 44:
 
 /* Line 1806 of yacc.c  */
-#line 127 "parse.y"
+#line 128 "parse.y"
     {(yyval.node)->type = tab_mult[(yyvsp[(1) - (3)].node)->type][(yyvsp[(3) - (3)].node)->type];}
     break;
 
   case 45:
 
 /* Line 1806 of yacc.c  */
-#line 128 "parse.y"
+#line 129 "parse.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 49:
 
 /* Line 1806 of yacc.c  */
-#line 134 "parse.y"
+#line 135 "parse.y"
     {(yyval.node) = (yyvsp[(1) - (1)].node);}
     break;
 
   case 50:
 
 /* Line 1806 of yacc.c  */
-#line 135 "parse.y"
+#line 136 "parse.y"
     {}
     break;
 
 
 
 /* Line 1806 of yacc.c  */
-#line 1838 "y.tab.c"
+#line 1839 "y.tab.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -2065,7 +2066,7 @@ yyreturn:
 
 
 /* Line 2067 of yacc.c  */
-#line 151 "parse.y"
+#line 152 "parse.y"
 
 void init(int tab[4][4])
 {
