@@ -1,0 +1,22 @@
+@a = 0
+def @set_parle()
+  @a7=5
+  return 0 
+ end
+
+@parole =5
+
+@box.int = 30
+@box2.float = 50.9
+@box3.string = "lassaad"
+
+def set_parle(@parole,@las)
+    @a = 2
+  return @parole  
+ end
+
+fname = "lassaad"
+
+def create_name(fname, lname)
+  name2=fname 
+end

@@ -1,0 +1,4 @@
+@i=0
+for @i in 5 to 8 
+@y = 3
+end

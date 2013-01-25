@@ -1,0 +1,6 @@
+def @set_parle()
+      @a=5
+	return 0 
+end
+
+
