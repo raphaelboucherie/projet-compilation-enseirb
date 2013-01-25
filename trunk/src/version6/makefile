@@ -6,7 +6,9 @@ all: rubic
 
 userdef.o:userdef.c
 	gcc -c $<
-node.o  :node.c
+node.o   :node.c
+	gcc -c $<
+llvm.o  :llvm.c
 	gcc -c $<
 lex.yy.c: scanner.l
 	lex $<
@@ -16,7 +18,7 @@ y.tab.o: y.tab.c y.tab.h userdef.o
 	$(CC) $(CFLAGS) -c $<
 lex.yy.o: lex.yy.c
 	$(CC) $(CFLAGS) -c $<
-rubic: y.tab.o lex.yy.o userdef.o node.o
+rubic: y.tab.o lex.yy.o userdef.o node.o llvm.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 run:

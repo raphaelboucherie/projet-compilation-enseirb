@@ -1,12 +1,11 @@
 #include<stdio.h>
 #include "llvm.h"
-int file = 0;
-int cpt = 0;
+extern int cpt;
 void llvm_title(FILE *pFile){
   
-  char buffer[] = "@str = constant[7 x i8] c\"=> %d\0A\00\"\n";
+  char buffer[] = "@str = constant[7 x i8] c\"=> \%d\0A\00\"\n";
     // write(STDOUT_FILENO, buffer, file * sizeof(char));
-  fprintf(pFile,"%s", buffer);
+  fprintf(pFile,"%s\n", buffer);
 }
 
 void llvm_opr(FILE *pFile, char opr, Node* a, Node *b){
@@ -301,31 +300,35 @@ void llvm_opr(FILE *pFile, char opr, Node* a, Node *b){
   }
  }
 
-void llvm_main(void){
+void llvm_main(FILE *pFile){
 
-  char buffer[] = "define i32 @main(){";
+  char buffer[] = "define i32 @main(){\n";
   fprintf(pFile,"%s", buffer);
 }
 
 
-void llvm_fini(void){
+void llvm_fini(FILE *pFile){
   char buffer[] = "}";
   fprintf(pFile,"%s", buffer);
 }
 
+void llvm_return(FILE *pFile){
+  fprintf(pFile,"ret i32 0;\n");
+}
 
-int main(void){
-  FILE* file = fopen("file.ll","w");
-  if (file == NULL)
-    perror("open");
+
+/* int main(void){ */
+/*   FILE* file = fopen("file.ll","w"); */
+/*   if (file == NULL) */
+/*     perror("open"); */
   
-  Node *a = NewNodeInt(1);
-  Node *b = NewNodeInt(2);
+/*   Node *a = NewNodeInt(1); */
+/*   Node *b = NewNodeInt(2); */
 
-  llvm_title(file);
-  llvm_opr(file,'+',a,b);
+/*   llvm_title(file); */
+/*   llvm_opr(file,'+',a,b); */
 
-  return 1;
+/*   return 1; */
     
 
-}
+/* } */
