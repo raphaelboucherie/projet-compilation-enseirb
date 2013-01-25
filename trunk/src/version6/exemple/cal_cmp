@@ -1,0 +1,21 @@
+1
+1.3
+1+2
+2 < 9
+(2 + 3.5) * 9
+(9 < 8) || (5 == 7)
+
+@a = 1
+@b = 1.3 
+@name = "hello"
+$global_variable = 10  
+@@no_of_customers=0
+@id = 1 
+@cust_id=@id 
+@id == 0;
+
+@chiffre = 0
+if (@chiffre == 1) then @chiffre=20
+else @chiffre = 10
+end
+
