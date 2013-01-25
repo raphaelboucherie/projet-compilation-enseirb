@@ -68,7 +68,7 @@
 
 Le projet consiste à créer un compilateur d'un langage objet proche du langage Ruby. Le langage sera compilé en du code intermédiaire du compilateur LLVM. L'appel au compilateur LLVM permettra ainsi de finir la compilation en binaire et de générer du code efficace. \\
 
-Dans ce rapport, il sera question de présenter , en premier temps, l'analyse du problème, puis la phase de conception dans laquelle nous allons présenter les structures untilisées pour les symboles et les expressions. Ensuite, nous introduirons le code cible produit.
+Dans ce rapport, il sera question de présenter , en premier temps, l'analyse du problème, puis la phase de conception dans laquelle nous allons présenter les structures utilisées pour les symboles et les expressions. Ensuite, nous introduirons le code cible produit.
 A la fin, un jeu de test a été effectué afin de vérifier que le compilateur arrive effectivement à compiler un code source introduit.
 
 \newpage
@@ -78,65 +78,81 @@ A la fin, un jeu de test a été effectué afin de vérifier que le compilateur 
 \section{Analyse du problème}
 
 \subsection{La grammaire}
-Voici la grammaire utilisée : 
+Voici la grammaire utilisée : \\
 
-program $\rightarrow$ topstmts opt$\_$terms \\
-topstmts $\rightarrow$ topstmt \\
-         | topstmts terms topstmt \\
-topstmt $\rightarrow$ CLASS ID term stmts END \\
+\noindent program $\rightarrow$ topstmts opt$\_$terms \\
+
+\noindent topstmts $\rightarrow$ topstmt \\
+       \hspace{1cm}  | topstmts terms topstmt \\
+
+\noindent topstmt $\rightarrow$ CLASS ID term stmts END \\
 | CLASS ID < ID term stmts END \\
 | stmt \\
-stmts $\rightarrow$ $\epsilon$ \\
+
+\noindent stmts $\rightarrow$ $\epsilon$ \\
 |stmt \\
 | stmts terms stmt \\
-stmt $\rightarrow$ IF expr THEN stmts terms END \\
+
+\noindent stmt $\rightarrow$ IF expr THEN stmts terms END \\
 | IF expr THEN stmts terms ELSE stmts terms END \\
 | FOR ID IN expr TO expr term stmts terms END \\
 | WHILE expr DO term stmts terms END \\
 | lhs = expr \\
 | RETURN expr \\
 | DEF ID opt$\_$params term stmts terms END \\
-opt$\_$params $\rightarrow$ $\epsilon$ \\
+
+\noindent opt$\_$params $\rightarrow$ $\epsilon$ \\
 | ( ) \\
 | ( params ) \\
-params $\rightarrow$ ID , params \\
+
+\noindent params $\rightarrow$ ID , params \\
 | ID \\
-lhs $\rightarrow$ ID \\
+
+\noindent lhs $\rightarrow$ ID \\
 | ID . primary \\
 | ID ( exprs ) \\
-exprs $\rightarrow$ exprs , expr \\
+
+\noindent exprs $\rightarrow$ exprs , expr \\
 | expr \\
-primary $\rightarrow$ lhs \\
+
+\noindent primary $\rightarrow$ lhs \\
 | STRING \\
 | FLOAT \\
 | INT \\
 | ( expr ) \\
-expr $\rightarrow$ expr AND comp$\_$expr \\
+
+\noindent expr $\rightarrow$ expr AND comp$\_$expr \\
 | expr OR comp$\_$expr \\
 | comp$\_$ expr \\
-comp$\_$expr $\rightarrow$ additive$\_$expr < additive$\_$expr \\
+
+\noindent comp$\_$expr $\rightarrow$ additive$\_$expr < additive$\_$expr \\
 | additive$\_$expr > additive$\_$expr \\  
 | additive$\_$expr LEQ additive$\_$expr \\  
 | additive$\_$expr GEQ additive$\_$expr \\  
 | additive$\_$expr EQ additive$\_$expr \\  
 | additive$\_$expr NEQ additive$\_$expr \\  
 | additive$\_$expr  \\
-additive$\_$expr $\rightarrow$  multiplicative$\_$expr \\ 
+
+\noindent additive$\_$expr $\rightarrow$  multiplicative$\_$expr \\ 
 | additive$\_$expr + multiplicative$\_$expr \\
 | additive$\_$expr - multiplicative$\_$expr \\
-multiplicative$\_$expr $\rightarrow$ multiplicative$\_$expr * primary \\
+
+\noindent multiplicative$\_$expr $\rightarrow$ multiplicative$\_$expr * primary \\
 | multiplicative$\_$expr / primary \\
 | primary \\
-opt$\_$terms $\rightarrow$ $\epsilon$ \\
+
+\noindent opt$\_$terms $\rightarrow$ $\epsilon$ \\
 | terms		\\
-terms $\rightarrow$ terms ; \\
+
+\noindent terms $\rightarrow$ terms ; \\
 %| terms '\n' \\
 | ; \\
 %| '\n'	\\	
-term $\rightarrow$ ; \\
+
+\noindent term $\rightarrow$ ; \\
 %| '\n' \\
 
-Voici un exemple de mot reconnu par la grammaire :
+Voici un exemple d'un mot reconnu par la grammaire :
 \begin{verbatim}
 def set_params()
    a = 5
@@ -144,17 +160,29 @@ def set_params()
 end 
 \end{verbatim}
 
-On obtient l'arbre suivant :
+On obtient l'arbre de dérivation suivant :
 
 \newpage
 \begin{figure}[!h]
 \includegraphics[width=0.8\textwidth]{Diagramme1.png}
-\caption{arbre d'exécution}
+\caption{arbre de dérivation}
 \end{figure}
 
 
 \subsection{Les modifications apportées sur la grammaire}
+\subsubsection*{Au niveau des conditionnelles avec \emph{if} :}
+Nous avons ajouter les lignes suivantes pour pouvoir traiter les conditionnelles sans \emph{``then''} : \\
 
+\noindent stmt $\rightarrow$ IF expr stmts terms END \\
+|IF expr stmts terms ELSE stmts terms END \\ 
+
+\subsubsection*{Au niveau des conditionnelles avec \emph{unless} :}
+Nous avons ajouter les lignes suivantes pour implémenter les conditionnelles avec \emph{``unless''} (fonctionnalité facultative) : \\
+
+\noindent stmt $\rightarrow$ UNLESS expr THEN stmts terms END \\ 
+| UNLESS expr THEN stmts terms ELSE stmts terms END \\
+| UNLESS expr stmts terms END \\
+| UNLESS expr stmts terms ELSE stmts terms END \\ 
 
 \section{Conception}
 
@@ -207,6 +235,8 @@ Les actions réalisées sur les symboles ont pour but de créer, initialiser, af
 \subsubsection*{Actions sur les expressions}
 
 \section{Analyse sémantique}
+L'analyse sémantique permet d'analyser et d'identifier les différents mots du langage. De plus, elle permet de vérifier que les types des différentes variables utilisées dans le programme sont corrects. Pour traiter cette phase, nous avons défini une table de symboles.
+ 
 
 \subsection{Table des symboles}
 
@@ -266,12 +296,32 @@ Les actions réalisées sur les symboles ont pour but de créer, initialiser, af
 
 \section{Production du code}
 
+La génération du code intermédiaire du compilateur LLVM se fait sous forme de fichier texte. Le code assembleur LLVM est structurée en fonctions et utilise des variables locales préfixées par \% et des variables globales préfixées par @. Les types utilisés sont \textbf{i32} pour un entier et \textbf{float}. \\
+
+\subsection{Traitement des instructions arithmétiques et logiques}
+Toute construction d'expression du langage est associée à une expression sémantique où un registre est créé pour contenir le résultat de l'évaluation d'une sous-expression. \\
+
+\noindent \textbf{Exemple :} \\
+l'expression (9+8) $\times$ (7-3) est traduite comme suit :
+\begin{verbatim}
+%r1 = sub i32 7, 3 
+%r2 = add i32 9, 8 
+%r3 = mul i32 %r2, %r1 
+\end{verbatim}
+
+\subsection{Traitement des conditionnelles}
+\subsection{Traitement des boucles \emph{for} et \emph{while}}
+
+
+
 \section{Tests}
 
+
+\newpage
 \section*{Conclusion}
 Au cours de ce projet, nous avons pu mettre en oeuvre les connaissances acquises au cours des séances de cours et de TD et les concepts élémentaires de compilation de langage de programmation. \\
 
-Nous nous sommes familiarisées avec des outils d'analyse lexicale tel LEX et d'analyse syntaxique tel YACC                                                 
+Nous nous sommes familiarisées avec des outils d'analyse lexicale tel LEX et d'analyse syntaxique tel YACC.
 
 
 \end{document}

@@ -232,10 +232,22 @@ Node* NodeExecute(Node *p) {
 
    switch(p->op.name) {
    case DEF:
-     fprintf(file,"fonction");
-     NodeExecute(p->op.node[0]);
-     return p;
+     fprintf(file, "define @");
+     NodePrint(NodeExecute(p->op.node[0]));
+     if(NodeExecute(p->op.node[1])->valuetype == 0)
+       fprintf(file, "i32 ");
+     else if (NodeExecute(p->op.node[1])->valuetype)
+       fprintf(file, "float ");    
+     else if (NodeExecute(p->op.node[1])->valuetype == 2)
+       fprintf(file, "[4 x i8] ");
+     NodePrint(NodeExecute(p->op.node[1]));
+     fprintf(file," { \n");
+
+   case END :     
+     fprintf(file, "} \n");
+     break;
      
+          
    case CLASS:
      return p;
       
