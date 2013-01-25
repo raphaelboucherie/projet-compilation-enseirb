@@ -43,7 +43,8 @@ typedef struct NodeTag {
 
 struct VarIndex
 {
-  float val;
+  //int val;
+  Node *val;
   char mark[10];
 };
 
@@ -61,15 +62,15 @@ struct VarDefine
 
  
 
-#define MAX_VARS 100     /* 最多变量数 */
+#define MAX_VARS 1000     /* 最多变量数 */
 
-#define MAX_DEFS 20      /* 最多保留字数 */
+#define MAX_DEFS 200      /* 最多保留字数 */
 
  
 
-#define MAX_BUFF_COLS 40   /* 分析语句最多行数 */
+#define MAX_BUFF_COLS 400   /* 分析语句最多行数 */
 
-#define MAX_BUFF_ROWS 40   /* 分析语句每行最多字符数 */
+#define MAX_BUFF_ROWS 400   /* 分析语句每行最多字符数 */
 
  
 
@@ -95,10 +96,12 @@ Content *set_content_float(float value);
 Content *set_content_int(int value);
 Content *set_content_string(char* value);
 Content *set_content_boolean(int value);
+Content *set_content_vide(void);
 Node *NewNodeInt(int value);
 Node *NewNodeFloat(float value);
 Node *NewNodeBoolean(int value);
 Node *NewNodeString(char* value);
+Node *NewNodeVide(void);
 Node *set_index(int value);
 
 Node *opr(int name, int num, ...);
@@ -108,4 +111,8 @@ void init_tab(int tab_plus[4][4],
 	      int tab_mult[4][4],
 	      int tab_comp[4][4]);
 void NodePrint(Node *p);
+int opr_node_int(char opr, int a, int b);
+float opr_node_float(char opr, float a, float b);
+Node *opr_node(int type,char opr,Node* a, Node*b);
+float int2float(Node *a);
 // #define PARSE_DEBUG    
