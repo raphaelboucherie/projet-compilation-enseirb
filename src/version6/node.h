@@ -30,8 +30,6 @@ typedef struct ContentTag {
 typedef struct NodeTag {
 
   NodeEnum type; /* 树结点类型 */
-
-  /* Union 必须是最后一个成员 */
   int valuetype;
   union{
     Content* content; /* 内容 */

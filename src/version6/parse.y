@@ -51,6 +51,7 @@
   float fval;
   char *sval;
   Node *node;
+  
 };
 %token <sval>STRING 
 %token <fval>FLOAT 
@@ -231,11 +232,12 @@ Node* NodeExecute(Node *p) {
 
    switch(p->op.name) {
    case DEF:
+     fprintf(file,"fonction");
      NodeExecute(p->op.node[0]);
-     return 0;
+     return p;
      
    case CLASS:
-     return 0;
+     return p;
       
    case WHILE:
      while(NodeExecute(p->op.node[0]))

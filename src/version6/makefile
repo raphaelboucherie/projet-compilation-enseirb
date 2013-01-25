@@ -21,10 +21,20 @@ lex.yy.o: lex.yy.c
 rubic: y.tab.o lex.yy.o userdef.o node.o llvm.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-run:
-	./rubic < test
-run2:
-	./rubic < test2
+cal:
+	./rubic < ./test/cal
+condition:
+	./rubic < ./test/condition
+boucle:
+	./rubic < ./test/boucle
+def:
+	./rubic < ./test/def
+class:
+	./rubic < ./test/class
+
+test:
+	llvm-as file.ll -f -o file.bc
+	llvm-ld -o=file -native file.bc
 
 clean:
 	rm -rf *~
@@ -36,3 +46,4 @@ clean:
 	rm -rf \#*
 	rm -rf main
 	rm -rf a.out
+	rm -rf file.ll

@@ -2,10 +2,8 @@
 #include "llvm.h"
 extern int cpt;
 void llvm_title(FILE *pFile){
-  
-  char buffer[] = "@str = constant[7 x i8] c\"=> \%d\0A\00\"\n";
-    // write(STDOUT_FILENO, buffer, file * sizeof(char));
-  fprintf(pFile,"%s\n", buffer);
+  fprintf(pFile,"@str = constant[7 x i8] c\"=> %%");
+  fprintf(pFile,"d\\0A\\00\"\n");
 }
 
 void llvm_opr(FILE *pFile, char opr, Node* a, Node *b){
