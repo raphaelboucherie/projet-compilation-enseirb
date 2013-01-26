@@ -1,6 +1,8 @@
 %{
 #include <stdio.h>
+
 #include "y.tab.h"
+
 
 int column=0; int lineno=0;
 
@@ -8,24 +10,13 @@ int column=0; int lineno=0;
 void count() {
   int i;
   for (i = 0; yytext[i] != '\0'; i++) {
-    if (yytext[i] == '\n'){     
-    column = 0;
-    printf("irb(main):%d:0>",lineno);
-    }
+    if (yytext[i] == '\n')
+      column = 0;
     else if (yytext[i] == '\t')
       column += 8 - (column % 8);
     else
       column++;
   }
-}
-/* Function that prints the string */
-void rubyprint(char s[]) {
-  int i = 0;
-  while(s[i]!= '\"'){
-    printf("%c",s[i]);
-    i++;
-  }
-  printf("\n");
 }
 /* Function called in case of error during parsing */
 void yyerror(char *s) {
@@ -36,14 +27,14 @@ void yyerror(char *s) {
 F ([0-9]+\.[0-9]*)
 I ([0-9]+)
 S (\"[^\n\"]*\")
-S1 (\"[^\"]*)
-ID ([$@]?[a-zA-Z_][a-zA-Z_0-9]*)
+ID ([$@]?[a-zA-Z_][a-zA-Z_0-9]*)  
 %%
-{F}      { count(); return(FLOAT); }
-{I}      { count(); return(INT); }
-{S}      { count(); rubyprint(yytext+1); return(STRING); }
-puts\"[^\n\"]*\" {count(); rubyprint(yytext + 5);printf("=>nil\n");return(STRING);}
-puts\ \"[^\n\"]*\" {count();rubyprint(yytext + 6);printf("=>nil\n"); return(STRING);}
+{F}      { yylval.fval = atof(yytext);count(); return(FLOAT); }
+{I}      { yylval.ival = atoi(yytext); count(); return(INT); }
+{S}      { yylval.sval = (char*)malloc(strlen(yytext)+1);
+           strcpy(yylval.sval, yytext);
+	   count(); 
+	   return(STRING);   }
 "for"    { count(); return(FOR); }
 "while"  { count(); return(WHILE);}
 "if"     { count(); return(IF); }
@@ -73,7 +64,11 @@ puts\ \"[^\n\"]*\" {count();rubyprint(yytext + 6);printf("=>nil\n"); return(STRI
 "/"	 { count(); return('/'); }
 "<"	 { count(); return('<'); }
 ">"	 { count(); return('>'); }
-{ID}     { count(); return(ID); }
+{ID}     { count();  
+	               yylval.sval = (char*)malloc(strlen(yytext)+1);
+                       strcpy(yylval.id, yytext);
+	               count(); 
+	               return(ID);   } 
 "\n"     { count(); lineno++; return('\n'); }
 [ \t\v\f]  { count(); }
 .        ;

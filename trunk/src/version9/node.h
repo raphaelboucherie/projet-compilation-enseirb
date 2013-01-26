@@ -9,9 +9,12 @@
 #define B 3 //bool
 #define U -1 //indef
 
-
+extern int tab_plus[4][4];
+extern int tab_mult[4][4];
+extern int tab_comp[4][4];
 
 typedef enum { TYPE_CONTENT, TYPE_INDEX, TYPE_OP } NodeEnum;
+//typedef enum { SU, IN, GEQ, LEQ , LEQ, EQ, NEQ, AND, OR} CmpEnum;
 typedef struct {
   int name; /* 操作符名称 */
   int num; /* 操作元个数 */
@@ -113,6 +116,7 @@ void init_tab(int tab_plus[4][4],
 void NodePrint(Node *p);
 int opr_node_int(char opr, int a, int b);
 float opr_node_float(char opr, float a, float b);
-Node *opr_node(int type,char opr,Node* a, Node*b);
+Node *opr_node(char opr,Node * a, Node * b);
+Node * opr_cmp(int opr,Node *a, Node *b);
 float int2float(Node *a);
 // #define PARSE_DEBUG    

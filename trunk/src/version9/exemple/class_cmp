@@ -1,0 +1,26 @@
+class Box
+   def @initialize(@w,@h)
+      @width = @w 
+      @height = @h
+   end
+   def @getWidth()
+      return 0
+   end
+   def @getHeight()
+      return 0
+   end
+   def @setWidth(@value)
+      @width = @value
+   end
+   def @setHeight(value)
+      @height = @value
+   end 
+end 
+
+
+class @Company
+  def @name()
+    return 0
+  end 
+end
+
