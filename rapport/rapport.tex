@@ -190,49 +190,85 @@ Nous avons ajouter les lignes suivantes pour implémenter les conditionnelles av
 
 
 \subsubsection*{Structure}
-Une table de symboles doit stocker un nombre important de noms de variables et d'informations qui leurs sont reliées. Elle n'a pas donc de taille fixe. De plus, il faut pouvoir y accéder de manière rapide. D'où le choix d'une liste chaînée. 
-Un symbole est représenté sous la forme d'une structure :  \\
-
-struct varIndex { \\
-char name[MAXSIZE]; \\
-typpo type; \\
-valeur *value; \\
-int ival; \\
-varIndex *next; \\
-}; \\
-
+Une table de symboles doit stocker un nombre important de noms de variables et d'informations qui leurs sont reliées. Elle n'a pas donc de taille fixe. De plus, il faut pouvoir y accéder de manière rapide. D'où le choix d'une liste chaînée.\\
+ 
+Un symbole est caractérisé par son type, sa valeur (son contenu) et la table dans la quelle il se trouve. Celui-ci peut être soit un identifiant, soit un opérateur, soit une valeur (entier, réel ou chaîne de caractères). Pour cela, nous avons commencé par définir un type énuméré pour désigner le type du symbole de la manière suivante : 
+\begin{verbatim} 
+enum NodeEnume {TYPE_CONTENT, TYPE_INDEX, TYPE_OP}; 
+\end{verbatim}
+où : 
 \begin{itemize}
-\item \emph{name} est le nom de la variable tel qu'il est dans le code source. \\
-\item \emph{type} est le type de la variable. Typpo étant un type énuméré où : \\
-\begin{itemize}
-\item 0 pour le type \emph{int}. \\
-\item 1 pour le type \emph{float}.\\
-\item 2 pour le type \emph{string}. \\
-\item 3 pour le type \emph{boolean}. \\
-\item 4 pour \emph{undef}. \\
+\item \emph{TYPE$\_$CONTENT} pour une valeur (exemple : 5, 16.3 etc...) \\
+\item \emph{TYPE$\_$INDEX} pour un identifiant (exemple : id, @x, etc...) \\
+\item \emph{TYPE$\_$OP} pour un opérateur (exemple : if, while, then, end, +, $\times$, etc...) \\
 \end{itemize}
 
-\item \emph{value} est la valeur du symbole. Valeur étant un type énuméré pour que la valeur soit de type int, float, string ou encore boolean en fonction du type du symbole.\\
-\emph{next} pointe sur le symbole suivant pour former une liste chaînée. \\
+Pour le contenu d'une variable, nous avons défini un type énuméré \emph{content} vu que le type du contenu peut être soit \textbf{int}, \textbf{float}, \textbf{string} ou \textbf{boolean} :
+\begin{verbatim}
+union content {
+int e;
+float f;
+char* s;
+int b;
+}
+\end{verbatim}
+La dernière variable b désigne le contenu d'un booléen : elle prend 1 si c'est vrai, 0 sinon. \\
+
+Un symbole est donc représenté sous la forme d'une structure de la manière suivante:  
+\begin{verbatim}
+struct Node { 
+NodeEnum type; 
+int valuetype; 
+Content content; 
+int index; 
+OpNode op;
+};
+\end{verbatim}
+
+avec :
+\begin{itemize}
+\item \emph{valuetype} est égal à :
+\begin{itemize}
+\item 0 pour \emph{int} 
+\item 1 pour \emph{float} 
+\item 2 pour \emph{string}
+\item 3 pour \emph{boolean}
+\item -1 pour \emph{undefined}
 \end{itemize}
-
-Le schéma suivant explique la liste des symboles que nous avons utilisée: \\
-
-==============schéma==========
+\item \emph{index} est le numéro du symbole dans la table. Cela permet de le retrouver facilemnt. 
+\item \emph{op} est la structure de la table des symboles. 
+\end{itemize}
 
 \subsubsection*{Actions sur les symboles}
-Les actions réalisées sur les symboles ont pour but de créer, initialiser, afficher, chercher, ajouter et libérer un symbole : \\
+Les actions réalisées sur les symboles ont pour but de créer, initialiser et afficher un symbole : \\
 \begin{itemize}
-\item nexVarIndex(void) $\rightarrow$ varIndex \\
-\item initVarIndex(varIndex*) $\rightarrow$ void \\
-\item printVarIndex(varIndex*) $\rightarrow$ void \\
+\item NewNodeInt (int) $\rightarrow$ Node* : cette fonction crée un nouveau symbole ayant une valeur de type entier. De la même manière, nous avons implémenté les fonctions \emph{NewNodeFloat, NewNodeBoolean, NewNodeString} et \emph{NewNodeVide}.
+\item NodeFree (Node*) $\rightarrow$ void
+\item NodePrint(Node*) $\rightarrow$ void
+\item opr$\_$node (int type, char opr, Node*a, Node* b) $\rightarrow$ Node* : effectue l'opération \emph{opr} entre les deux symboles a et b.
 \end{itemize}
 
-\subsection{Les expressions}
 
-\subsubsection*{Structure}
+\subsection{La table des symboles}
+\begin{verbatim}
+struct OpNode {
+int name;
+int num;
+Node* node[1];
+}
+\end{verbatim}
 
-\subsubsection*{Actions sur les expressions}
+\begin{itemize}
+\item \emph{name}
+\item \emph{num}
+\item \emph{node}
+\end{itemize}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.8\textwidth]{exemple.png}
+\caption{exemple}
+\end{figure}
 
 \section{Analyse sémantique}
 L'analyse sémantique permet d'analyser et d'identifier les différents mots du langage. De plus, elle permet de vérifier que les types des différentes variables utilisées dans le programme sont corrects. Pour traiter cette phase, nous avons défini une table de symboles.
