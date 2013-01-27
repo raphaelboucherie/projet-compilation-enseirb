@@ -236,7 +236,6 @@ float int2float(Node *a){
 }
 
 Node * opr_cmp(int opr,Node *a, Node *b){
-
   switch(opr){
 
   case 1:
@@ -250,7 +249,7 @@ Node * opr_cmp(int opr,Node *a, Node *b){
   case 2:
      if (tab_comp[a->valuetype][b->valuetype] == B)
 	{
-	  llvm_cmp(file,"<",a,b);
+	  llvm_cmp(file,">",a,b);
 	  if(int2float(a) >int2float(b)) return NewNodeBoolean(1);
 	  else return NewNodeBoolean(0);
 	}

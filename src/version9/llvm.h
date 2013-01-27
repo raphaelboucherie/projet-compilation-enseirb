@@ -9,5 +9,6 @@ void llvm_def();
 void llvm_opr(FILE *pFile, char opr, Node* a, Node *b);
 void llvm_title(FILE *pFile);
 void llvm_main(FILE *pFile);
-void llvm_return(FILE *pFile);
-void llvm_fini(FILE *pFIle);
+void llvm_return(FILE *pFile,Node *a);
+void llvm_fini(FILE *pFile);
+void llvm_if(FILE *pFile);

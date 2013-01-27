@@ -1,4 +1,6 @@
-@i=0
-while (@i<10) do 
-@y = 3 + @i
+@i = 0
+while (@i < 5) do 
+@a = @i + 1
+@i = @a
 end
+@i == 5

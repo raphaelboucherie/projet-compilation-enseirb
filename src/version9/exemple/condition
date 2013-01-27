@@ -1,3 +1,7 @@
+if ( 5 < 7 ) then return 8
+else return 9
+end
+
 if ( 5 > 7 ) then return 8
 else return 9
 end

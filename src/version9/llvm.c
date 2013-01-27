@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include "llvm.h"
 extern int cpt;
+extern int res;
 extern int tab_plus[4][4];
 extern int tab_mult[4][4];
 extern int tab_comp[4][4];
@@ -60,21 +61,21 @@ void llvm_cmp(FILE *pFile, char* cmp, Node* a, Node *b){
   if(a->valuetype == I && b->valuetype == I){
     x = a->content->e;
     y = b->content->e;
-    if (!strcmp(cmp, "==")) 
+    if (strcmp(cmp, "==") == 0) 
       fprintf(pFile, "%%r%d = icmp eq i32 %d, %d \n", cpt, x , y);
 
-    else if(!strcmp(cmp , "!=")) 
+    else if(strcmp(cmp , "!=") == 0) 
       fprintf(pFile, "%%r%d = icmp eq i32 %d, %d \n", cpt, x,y);
 
       
-    else if (!strcmp(cmp , ">")) {
+    else if (strcmp(cmp , ">")==0) {
       if (x >= 0 && y >= 0)
 	fprintf(pFile, "%%r%d = icmp ugt i32 %d, %d \n", cpt, x,y);
       else
 	fprintf(pFile, "%%r%d = icmp sgt i32 %d, %d \n", cpt, x,y);
     }
       
-    else if(!strcmp(cmp , ">=")) {
+    else if(strcmp(cmp , ">=")==0) {
       if (x >= 0 && y >= 0)
 	fprintf(pFile, "%%r%d = icmp uge i32 %d, %d \n", cpt, x,y);
       else
@@ -82,14 +83,14 @@ void llvm_cmp(FILE *pFile, char* cmp, Node* a, Node *b){
     }
 
       
-    else if (!strcmp(cmp ,"<" )){
+    else if (strcmp(cmp ,"<" )==0){
       if (x >= 0 && y >= 0)
 	fprintf(pFile, "%%r%d = icmp ult i32 %d, %d \n", cpt, x,y);
       else
 	fprintf(pFile, "%%r%d = icmp slt i32 %d, %d \n", cpt, x,y);
     }
       
-    else if (!strcmp(cmp ,"<=")) { 
+    else if (strcmp(cmp ,"<=")== 0) { 
       if (x >= 0 && y >= 0)
 	fprintf(pFile, "%%r%d = icmp ule i32 %d, %d \n", cpt, x,y);
       else
@@ -130,14 +131,27 @@ void llvm_main(FILE *pFile){
 
 void llvm_fini(FILE *pFile){
   char buffer[] = "}";
+  fprintf(pFile,"ret i32 0;\n");
   fprintf(pFile,"%s", buffer);
 }
 
-void llvm_return(FILE *pFile){
-  fprintf(pFile,"ret i32 0;\n");
+void llvm_return(FILE *pFile,Node *a){
+  fprintf(pFile, "%%ptr%d = alloca i32\n",res);
+  fprintf(pFile, "store i32 %d, i32* %%ptr%d\n", a->content->e, res);
+  res++;
 }
 
 void llvm_print(FILE *pFile){
   fprintf(pFile,"call i32 (i8*, ...)*");
   fprintf(pFile,"@printf(i8* getelementptr ([7 x i8]* @str, i32 0, i32 0), i32 %%r%d)\n",cpt);
+}
+
+void llvm_if(FILE *pFile){
+  cpt++;
+  fprintf(pFile,"%%r%d = load i32* %%ptr%d\n", cpt, res-2);
+  cpt++;
+  fprintf(pFile,"%%r%d = load i32* %%ptr%d\n", cpt, res-1);
+  cpt++;
+  fprintf(pFile,"%%r%d = select i1 %%r%d,i32 %%r%d,i32 %%r%d\n" ,cpt, cpt-3, cpt-2, cpt-1);
+  llvm_print(pFile);
 }
