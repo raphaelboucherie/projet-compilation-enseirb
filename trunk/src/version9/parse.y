@@ -20,6 +20,7 @@
   int iBuffX=0;
   int iBuffY=0;
   int cpt = 0;
+  int res = 0;
   FILE* file = NULL;
   extern int lineno;
   extern int column;
@@ -95,8 +96,10 @@ topstmt {}//NodeExecute($$);$$ = $1;printf("------------------------------------
 topstmt	        : 
 CLASS ID term stmts term END {printf("--------------------------------class\n");} 
 | CLASS ID '<' ID term stmts END {}
-| stmt  {$$ = $1;NodePrint($$);llvm_print(file);NodeFree($$);}
-| exprs {$$ = $1;NodePrint($$);llvm_print(file);NodeFree($$);}
+| stmt  {$$ = $1;
+  //llvm_print(file);
+  NodePrint($$);}
+| exprs {$$ = $1;llvm_print(file);NodePrint($$);NodeFree($$);}
 ;
 
 stmts	        : 
@@ -105,37 +108,39 @@ stmt {$$ = $1;}
 ;
 
 stmt		: 
-IF expr THEN stmts terms END {printf("I want");$$ = NodeExecute(opr(IF, 2, $2, $4)); }
-| IF expr THEN stmts terms ELSE stmts terms END {$$ = NodeExecute(opr(IF, 3, $2, $4, $7));}
-| IF expr stmts terms END {$$ = NodeExecute(opr(IF, 2, $2, $3));}
-| IF expr stmts terms ELSE stmts terms END {$$ = NodeExecute(opr(IF, 3, $2, $4, $6));} 
+IF expr THEN stmts terms END {$$ = NodeExecute(opr(IF, 2, $2, $4)); llvm_if(file);}
+| IF expr THEN stmts terms ELSE stmts terms END {$$ = NodeExecute(opr(IF, 3, $2, $4, $7)); llvm_if(file);}
+| IF expr stmts terms END {$$ = NodeExecute(opr(IF, 2, $2, $3)); llvm_if(file);}
+| IF expr stmts terms ELSE stmts terms END {$$ = NodeExecute(opr(IF, 3, $2, $4, $6)); llvm_if(file);} 
 | UNLESS expr THEN stmts terms END {$$ = NodeExecute(opr(UNLESS, 2, $2, $4));}
 | UNLESS expr THEN stmts terms ELSE stmts terms END {$$ = NodeExecute(opr(UNLESS, 3, $2, $4, $7));}
 | UNLESS expr stmts terms END {$$ = NodeExecute(opr(UNLESS, 2, $2, $3));}
 | UNLESS expr stmts terms ELSE stmts terms END {$$ = NodeExecute(opr(IF, 3, $2, $4, $6));}
 | FOR exprs IN expr TO expr term stmts terms END {$$ = NodeExecute(opr(FOR, 4, $2, $4, $6, $8));printf("\tfor\n");}
-| WHILE expr DO term stmts terms END {$$ = NodeExecute(opr(WHILE,2,$2,$5));printf("\twhile\n");}
-| lhs '=' expr {$$ = NodeExecute(opr('=',2,$1,$3));}//{$$ = set_index($1); $$->valuetype = $3->valuetype; $$->content = $3->content; NodePrint($$);}
-| RETURN expr {$$ = $2;}
-| DEF ID opt_params term stmts terms END {$$ = NodeExecute(opr(DEF,3,$2,$3,$5));printf("\t\tdef\n");}
+| WHILE expr DO term stmts terms END {
+  $$ = NodeExecute(opr(WHILE,2,$2,$5));}
+| lhs '=' expr {$$ = NodeExecute(opr('=',2,$1,$3));}
+| RETURN expr {$$ = $2;llvm_return(file,$$);}
+| DEF ID opt_params term stmts terms END {$$ = NewNodeVide();
+  printf("------------------------------------------------------------\tdef\n");}
 ; 
 
 opt_params      : /* none */
-'(' ')' {}
+'(' ')' {$$ = NewNodeVide();}
 | '(' params ')' {$$ = $2;}
 ;
 params          : 
-ID ',' params {}
+ID ',' params {$$ = NewNodeVide();}
 | ID {$$ = set_index($1);}
 ; 
 lhs             : 
 ID {$$ = set_index($1);}
-| ID '.' primary {$$ = set_index($1);}//$ = set_index(strcat($1,primary));}
-| ID '(' exprs ')' {$$ = set_index($1);}//{$$ = set_index(1); $$->valuetype = $3->valuetype; $$->content = $3->content; NodePrint($$);}
+| ID '.' primary {$$ = set_index($1);}
+| ID '(' exprs ')' {$$ = set_index($1);}
 ;
 exprs           : 
 exprs ',' expr {}
-| expr {$$ = NodeExecute($1);printf("expr");}
+| expr {$$ = NodeExecute($1);printf("=>");}
 ;
 expr            : 
 expr AND comp_expr {$$ = (opr(AND, 2, $1, $3));}
@@ -144,31 +149,21 @@ expr AND comp_expr {$$ = (opr(AND, 2, $1, $3));}
 ;
 comp_expr       : 
 additive_expr '<' additive_expr  {$$ = (opr('<',2,$1,$3));} 
-//{$$ = opr('<', 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];}
 | additive_expr '>' additive_expr {$$ = (opr('>',2,$1,$3));} 
-  //{$$ = opr('>', 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];}
 | additive_expr LEQ additive_expr {$$ = (opr(LEQ,2,$1,$3));} 
-  //{$$ = opr(LEQ, 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];}
 | additive_expr GEQ additive_expr {$$ = (opr(GEQ,2,$1,$3));} 
-  //{$$ = opr(GEQ, 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];}
 | additive_expr EQ additive_expr  {$$ = (opr(EQ,2,$1,$3));} 
-  //{$$ = opr(EQ , 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];}
 | additive_expr NEQ additive_expr {$$ = (opr(NEQ,2,$1,$3));} 
-  //{$$ = opr(NEQ, 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];}
 | additive_expr {$$ = $1;}
 ;
 additive_expr   : 
 multiplicative_expr {$$ = $1;}
 | additive_expr '+' multiplicative_expr {$$ = (opr('+',2,$1,$3));}
-//{$$ = opr('+',2,$1,$3);$$->valuetype = tab_plus[$1->valuetype][$3->valuetype];}
 | additive_expr '-' multiplicative_expr {$$ = (opr('-',2,$1,$3));}
-  //{$$ = opr('-',2,$1,$3);$$->valuetype = tab_plus[$1->valuetype][$3->valuetype];}
 ;
 multiplicative_expr : 
 multiplicative_expr '*' primary {$$ = (opr('*',2,$1,$3));}
-//{$$ = opr('*',2,$1,$3);$$->valuetype = tab_mult[$1->valuetype][$3->valuetype];}
 | multiplicative_expr '/' primary {$$ = (opr('/',2,$1,$3));}
-  //{$$ = opr('+',2,$1,$3); $$->valuetype = tab_mult[$1->valuetype][$3->valuetype];}
 | primary {$$ = $1;}
 ;
 primary         : 
@@ -193,115 +188,6 @@ term            :
 | '\n' {}
 | ' ' {}
 ;
-/* program		:   */
-/* topstmts opt_terms {printf("fini");} */
-/* ; */
-/* topstmts        :       */
-/* topstmt {}//($$);$$ = $1;printf("------------------------------------------------------------------------");} */
-/* | topstmts terms topstmt {} */
-/* //| topstmts terms topstmt {} */
-/* ; */
-/* topstmt	        :  */
-/* CLASS ID term stmts term END {printf("--------------------------------class\n");}  */
-/* | CLASS ID '<' ID term stmts END {} */
-/* | stmt  {$$ = NodeExecute($1);llvm_print(file);NodePrint($$);NodeFree($$);} */
-/* | exprs {$$ = NodeExecute($1);llvm_print(file);NodePrint($$);NodeFree($$);} */
-/* ; */
-
-/* stmts	        :  */
-/* stmt {$$ = $1;} */
-/* | stmts terms stmt {} */
-/* ; */
-
-/* stmt		:  */
-/* IF expr THEN stmts terms END {printf("I want");$$ = (opr(IF, 2, $2, $4)); } */
-/* | IF expr THEN stmts terms ELSE stmts terms END {$$ = (opr(IF, 3, $2, $4, $7));} */
-/* | IF expr stmts terms END {$$ = (opr(IF, 2, $2, $3));} */
-/* | IF expr stmts terms ELSE stmts terms END {$$ = (opr(IF, 3, $2, $4, $6));}  */
-/* | UNLESS expr THEN stmts terms END {$$ = (opr(UNLESS, 2, $2, $4));} */
-/* | UNLESS expr THEN stmts terms ELSE stmts terms END {$$ = (opr(UNLESS, 3, $2, $4, $7));} */
-/* | UNLESS expr stmts terms END {$$ = (opr(UNLESS, 2, $2, $3));} */
-/* | UNLESS expr stmts terms ELSE stmts terms END {$$ = (opr(IF, 3, $2, $4, $6));} */
-/* | FOR exprs IN expr TO expr term stmts terms END {$$ = (opr(FOR, 4, $2, $4, $6, $8));} */
-/* | WHILE exprs DO term stmts terms END {$$ = (opr(WHILE,2,$2,$5));printf("\twhile\n");} */
-/* | lhs '=' expr {$$ = NodeExecute(opr('=',2,$1,$3));printf("I want");} */
-/* | RETURN expr {$$ = $2;} */
-/* | DEF ID opt_params term stmts terms END {$$ = (opr(DEF,3,$2,$3,$5));printf("\t\tdef\n");} */
-/* ;  */
-
-/* opt_params      : /\* none *\/ */
-/* '(' ')' {} */
-/* | '(' params ')' {$$ = $2;} */
-/* ; */
-/* params          :  */
-/* ID ',' params {} */
-/* | ID {$$ = set_index($1);} */
-/* ;  */
-/* lhs             :  */
-/* ID {$$ = set_index($1);} */
-/* | ID '.' primary {$$ = set_index($1);}//$ = set_index(strcat($1,primary));} */
-/* | ID '(' exprs ')' {$$ = set_index($1);} */
-/* ; */
-/* exprs           :  */
-/* exprs ',' expr {} */
-/* | expr {$$ = NodeExecute($1);printf("=>");} */
-/* ; */
-/* expr            :  */
-/* expr AND comp_expr {$$ = (opr(AND, 2, $1, $3));} */
-/* | expr OR comp_expr {$$ = (opr(OR, 2, $1, $3));} */
-/* | comp_expr {$$ = $1;} */
-/* ; */
-/* comp_expr       :  */
-/* additive_expr '<' additive_expr  {$$ = (opr('<',2,$1,$3));}  */
-/* //{$$ = opr('<', 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];} */
-/* | additive_expr '>' additive_expr {$$ = (opr('>',2,$1,$3));}  */
-/*   //{$$ = opr('>', 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];} */
-/* | additive_expr LEQ additive_expr {$$ = (opr(LEQ,2,$1,$3));}  */
-/*   //{$$ = opr(LEQ, 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];} */
-/* | additive_expr GEQ additive_expr {$$ = (opr(GEQ,2,$1,$3));}  */
-/*   //{$$ = opr(GEQ, 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];} */
-/* | additive_expr EQ additive_expr  {$$ = (opr(EQ,2,$1,$3));}  */
-/*   //{$$ = opr(EQ , 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];} */
-/* | additive_expr NEQ additive_expr {$$ = (opr(NEQ,2,$1,$3));}  */
-/*   //{$$ = opr(NEQ, 2, $1, $3);$$->valuetype = tab_comp[$1->valuetype][$3->valuetype];} */
-/* | additive_expr {$$ = $1;} */
-/* ; */
-/* additive_expr   :  */
-/* multiplicative_expr {$$ = $1;} */
-/* | additive_expr '+' multiplicative_expr {$$ = (opr('+',2,$1,$3));} */
-/* //{$$ = opr('+',2,$1,$3);$$->valuetype = tab_plus[$1->valuetype][$3->valuetype];} */
-/* | additive_expr '-' multiplicative_expr {$$ = (opr('-',2,$1,$3));} */
-/*   //{$$ = opr('-',2,$1,$3);$$->valuetype = tab_plus[$1->valuetype][$3->valuetype];} */
-/* ; */
-/* multiplicative_expr :  */
-/* multiplicative_expr '*' primary {$$ = (opr('*',2,$1,$3));} */
-/* //{$$ = opr('*',2,$1,$3);$$->valuetype = tab_mult[$1->valuetype][$3->valuetype];} */
-/* | multiplicative_expr '/' primary {$$ = (opr('/',2,$1,$3));} */
-/*   //{$$ = opr('+',2,$1,$3); $$->valuetype = tab_mult[$1->valuetype][$3->valuetype];} */
-/* | primary {$$ = $1;} */
-/* ; */
-/* primary         :  */
-/* lhs */
-/* | STRING {printf("string");$$ = NewNodeString($1);} */
-/* | FLOAT {$$ = NewNodeFloat($1);} */
-/* | INT {$$ = NewNodeInt($1);} */
-/* | '(' expr ')' {$$ = $2;} */
-/* ; */
-/* opt_terms	: /\* none *\/ */
-/* | terms */
-/* ; */
-/* terms		:  */
-/* terms ';' */
-/* | terms '\n'{} */
-/* | ';' {$$ = opr(';', 2, NULL, NULL);} */
-/* | '\n' {} */
-/* | ' ' {} */
-/* ; */
-/* term            :  */
-/* ';' {$$ = opr(';', 2, NULL, NULL);} */
-/* | '\n' {} */
-/* | ' ' {} */
-/* ; */
 
 %%
 
@@ -349,10 +235,22 @@ Node* NodeExecute(Node *p) {
      return p;
       
    case WHILE:
-     while(NodeExecute(p->op.node[0])->content->b == 1)
-       return NodeExecute(p->op.node[1]);
-     return p;
+     printf("----------------------------while----------------------------------\n");
+     /* NodePrint(NodeExecute(p->op.node[0])); */
+     /* if(NodeExecute(p->op.node[0])->content->b == 0) */
+     /*   return opr(IF,2,p->op.node[0],p->op.node[1]); */
+     /*   //    exit(0); */
+     /* else if(NodeExecute(p->op.node[0])->content->b == 1){ */
+       
+     /*   NodeExecute(p->op.node[1]); */
+     /*   return NodeExecute(p); */
+     /* } */
 
+     while((NodeExecute(p->op.node[0]))->content->b == 1){
+       NodePrint(NodeExecute(p->op.node[1]));
+     }
+     return p;
+     
    case FOR:
      /* printf("-------------------------for----------------------------------"); */
      /* // while((int2float(NodeExecute(p->op.node[0])) <= int2float(NodeExecute(p->op.node[1])))&& */
@@ -380,9 +278,7 @@ Node* NodeExecute(Node *p) {
    
 
    case IF:
-     
-     if (NodeExecute(p->op.node[0])->content->b == 1 && 
-	 NodeExecute(p->op.node[0])->valuetype == B)
+     if (NodeExecute(p->op.node[0])->content->b == 1)
        return NodeExecute(p->op.node[1]);
      else
        if (p->op.num>2)
@@ -432,7 +328,7 @@ int main(void) {
   llvm_title(file);
   llvm_main(file);
   yyparse();
-  llvm_return(file);
+  //llvm_return(file);
   llvm_fini(file);
   return 0;
 

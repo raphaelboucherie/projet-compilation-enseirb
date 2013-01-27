@@ -49,3 +49,4 @@ clean:
 	rm -rf main
 	rm -rf a.out
 	rm -rf file*
+	rm -rf ./exemple/*~
