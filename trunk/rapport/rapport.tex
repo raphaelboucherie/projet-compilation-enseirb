@@ -50,10 +50,10 @@
 \item[]}{\end{list}}
 
 
-%\thispagestyle{empty}
-% \begin{figure}
-% \includegraphics[width=0.25\textwidth]{enseirb-matmeca.jpg}
-% \end{figure}
+\thispagestyle{empty}
+\begin{figure}
+\includegraphics[width=0.25\textwidth]{enseirb-matmeca.jpg}
+\end{figure}
 
 \maketitle
 
@@ -145,12 +145,14 @@ Voici la grammaire utilisée : \\
 | terms		\\
 
 \noindent terms $\rightarrow$ terms ; \\
-%| terms '\n' \\
+| term '\textbackslash n' \\
 | ; \\
-%| '\n'	\\	
+| '\textbackslash n'	\\	
+| ' '\\
 
 \noindent term $\rightarrow$ ; \\
-%| '\n' \\
+| '\textbackslash n' \\
+| ' ' \\
 
 Voici un exemple d'un mot reconnu par la grammaire :
 \begin{verbatim}
@@ -171,18 +173,19 @@ On obtient l'arbre de dérivation suivant :
 
 \subsection{Les modifications apportées sur la grammaire}
 \subsubsection*{Au niveau des conditionnelles avec \emph{if} :}
-Nous avons ajouter les lignes suivantes pour pouvoir traiter les conditionnelles sans \emph{``then''} : \\
+\noindent Nous avons ajouté les lignes suivantes pour pouvoir traiter les conditionnelles sans \emph{``then''} : \\
 
 \noindent stmt $\rightarrow$ IF expr stmts terms END \\
 |IF expr stmts terms ELSE stmts terms END \\ 
 
 \subsubsection*{Au niveau des conditionnelles avec \emph{unless} :}
-Nous avons ajouter les lignes suivantes pour implémenter les conditionnelles avec \emph{``unless''} (fonctionnalité facultative) : \\
+\noindent Nous avons ajouté les lignes suivantes pour implémenter les conditionnelles avec \emph{``unless''} (fonctionnalité facultative) : \\
 
 \noindent stmt $\rightarrow$ UNLESS expr THEN stmts terms END \\ 
 | UNLESS expr THEN stmts terms ELSE stmts terms END \\
 | UNLESS expr stmts terms END \\
 | UNLESS expr stmts terms ELSE stmts terms END \\ 
+\newpage
 
 \section{Conception}
 
@@ -190,16 +193,16 @@ Nous avons ajouter les lignes suivantes pour implémenter les conditionnelles av
 
 
 \subsubsection*{Structure}
-Une table de symboles doit stocker un nombre important de noms de variables et d'informations qui leurs sont reliées. Elle n'a pas donc de taille fixe. De plus, il faut pouvoir y accéder de manière rapide. D'où le choix d'une liste chaînée.\\
+Une table de symboles doit stocker un nombre important de noms de variables et d'informations qui leurs sont reliées. Elle n'a pas donc de taille fixe. De plus, il faut pouvoir y accéder de manière rapide.\\
  
-Un symbole est caractérisé par son type, sa valeur (son contenu) et la table dans la quelle il se trouve. Celui-ci peut être soit un identifiant, soit un opérateur, soit une valeur (entier, réel ou chaîne de caractères). Pour cela, nous avons commencé par définir un type énuméré pour désigner le type du symbole de la manière suivante : 
+Un symbole est caractérisé par son type, sa valeur (son contenu) et la table dans laquelle il se trouve. Celui-ci peut être soit un identificateur, soit un opérateur, soit une valeur (entier, réel ou chaîne de caractères). Pour cela, nous avons commencé par définir un type énuméré pour désigner le type du symbole de la manière suivante : 
 \begin{verbatim} 
-enum NodeEnume {TYPE_CONTENT, TYPE_INDEX, TYPE_OP}; 
+enum NodeEnum {TYPE_CONTENT, TYPE_INDEX, TYPE_OP}; 
 \end{verbatim}
 où : 
 \begin{itemize}
 \item \emph{TYPE$\_$CONTENT} pour une valeur (exemple : 5, 16.3 etc...) \\
-\item \emph{TYPE$\_$INDEX} pour un identifiant (exemple : id, @x, etc...) \\
+\item \emph{TYPE$\_$INDEX} pour un identificateur (exemple : id, @x, etc...) \\
 \item \emph{TYPE$\_$OP} pour un opérateur (exemple : if, while, then, end, +, $\times$, etc...) \\
 \end{itemize}
 
@@ -249,7 +252,9 @@ Les actions réalisées sur les symboles ont pour but de créer, initialiser et 
 \end{itemize}
 
 
-\subsection{La table des symboles}
+\subsection{Les expressions}
+
+Une expression est définie comme suit : 
 \begin{verbatim}
 struct OpNode {
 int name;
@@ -257,25 +262,27 @@ int num;
 Node* node[1];
 }
 \end{verbatim}
-
+ avec: 
 \begin{itemize}
-\item \emph{name}
-\item \emph{num}
-\item \emph{node}
+\item \emph{name} le nom de l'identificateur au début de l'expression. 
+\item \emph{num} le nombre de noeuds dans l'expression.
+\item \emph{node} le pointeur sur le premier noeud dans l'expression.
 \end{itemize}
 
+\noindent Exemple : \\
+\noindent Pour l'expression if (x == 5) || (y < 8) then z = 5.5 end, nous avons le schéma suivant : 
 \begin{figure}[!h]
 \centering
 \includegraphics[width=0.8\textwidth]{exemple.png}
 \caption{exemple}
 \end{figure}
 
+\newpage
 \section{Analyse sémantique}
-L'analyse sémantique permet d'analyser et d'identifier les différents mots du langage. De plus, elle permet de vérifier que les types des différentes variables utilisées dans le programme sont corrects. Pour traiter cette phase, nous avons défini une table de symboles.
+L'analyse sémantique permet d'analyser et d'identifier les différents mots du langage. De plus, elle permet de vérifier que les types des différentes variables utilisées dans le programme sont corrects.
  
-
 \subsection{Table des symboles}
-
+Pour les opérateurs +, $\times$ et \emph{cmp}, voici les tables donnant pour chaque type d'opérande, le type du résultat : \\
 \begin{center}
 \begin{tabular}{|c|c|c|c|c|}
   \hline
@@ -329,29 +336,15 @@ L'analyse sémantique permet d'analyser et d'identifier les différents mots du 
 
 
 \subsection{Table des expressions}
+Chaque expression est constituée d'un \emph{noeud} résultat, un \emph{opérateur}, un \emph{noeud} gauche et un \emph{noeud} droit. 
 
+\newpage
 \section{Production du code}
+\input{partie4.tex}
 
-La génération du code intermédiaire du compilateur LLVM se fait sous forme de fichier texte. Le code assembleur LLVM est structurée en fonctions et utilise des variables locales préfixées par \% et des variables globales préfixées par @. Les types utilisés sont \textbf{i32} pour un entier et \textbf{float}. \\
-
-\subsection{Traitement des instructions arithmétiques et logiques}
-Toute construction d'expression du langage est associée à une expression sémantique où un registre est créé pour contenir le résultat de l'évaluation d'une sous-expression. \\
-
-\noindent \textbf{Exemple :} \\
-l'expression (9+8) $\times$ (7-3) est traduite comme suit :
-\begin{verbatim}
-%r1 = sub i32 7, 3 
-%r2 = add i32 9, 8 
-%r3 = mul i32 %r2, %r1 
-\end{verbatim}
-
-\subsection{Traitement des conditionnelles}
-\subsection{Traitement des boucles \emph{for} et \emph{while}}
-
-
-
+\newpage
 \section{Tests}
-
+\input{partie5.tex}
 
 \newpage
 \section*{Conclusion}
